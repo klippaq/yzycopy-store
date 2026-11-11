@@ -2,35 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>STUDIO – Student Project Store</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STUDIO</title>
 <style>
-:root{--bg:#f2f2f2;--fg:#111;--mute:#888;--tile:#e6e6e6;--shape:#bdbdbd;--line:#111;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111;--fg:#eee;--mute:#777;--tile:#1c1c1c;--shape:#444;--line:#eee}}
-:root[data-theme="dark"]{--bg:#111;--fg:#eee;--mute:#777;--tile:#1c1c1c;--shape:#444;--line:#eee}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+:root{--bg:#fff;--fg:#111;--mute:#8a8a8a;--tile:#f4f4f4}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:11px/1.4 Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.06em}
-header{position:sticky;top:env(safe-area-inset-top,0px);display:flex;justify-content:space-between;padding:14px 16px;background:var(--bg);z-index:5}
+header{position:sticky;top:0;display:flex;justify-content:space-between;padding:14px 16px;background:var(--bg);z-index:5}
 a,button{color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;background:none;border:0;cursor:pointer;text-decoration:none;padding:0}
 a:hover,button:hover{color:var(--mute)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;padding:0 1px}
-.tile{background:var(--tile);aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:space-between;padding:10px}
-.tile svg{width:70%;margin:auto}
+h2{font-size:11px;font-weight:400;margin:28px 16px 10px;color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;padding:0 1px}
+.tile{background:var(--tile);aspect-ratio:4/5;display:flex;flex-direction:column;justify-content:space-between;padding:10px;overflow:hidden}
+.tile img{width:100%;height:80%;object-fit:contain;margin:auto}
 .tile span{color:var(--mute)}
 .tile:hover span{color:var(--fg)}
-.pdp{display:grid;grid-template-columns:1.4fr 1fr;gap:1px;min-height:80vh}
-.pdp .img{background:var(--tile);display:flex;align-items:center;justify-content:center;padding:24px}
-.pdp .img svg{width:min(70%,420px)}
-.pdp .info{padding:16px;display:flex;flex-direction:column;gap:18px}
+.pdp{display:grid;grid-template-columns:1.4fr 1fr;gap:1px;min-height:85vh}
+.gallery{position:relative;background:var(--tile)}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;height:100%}
+.slides::-webkit-scrollbar{display:none}
+.slides .s{flex:0 0 100%;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;padding:20px;min-height:70vh}
+.slides img{max-width:100%;max-height:75vh;object-fit:contain}
+.arrow{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;padding:12px}
+.prev{left:4px}.next{right:4px}
+.dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:8px}
+.dots i{width:6px;height:6px;border-radius:50%;background:#c9c9c9}
+.dots i.on{background:var(--fg)}
+.info{padding:16px;display:flex;flex-direction:column;gap:18px}
 .sizes{display:flex;flex-wrap:wrap;gap:6px}
 .sizes button{border:1px solid var(--mute);padding:8px 12px}
-.sizes button.on{border-color:var(--line);background:var(--fg);color:var(--bg)}
-.add{border:1px solid var(--line);padding:12px;text-align:center}
+.sizes button.on{border-color:var(--fg);background:var(--fg);color:var(--bg)}
+.add{border:1px solid var(--fg);padding:12px;text-align:center}
 .add:hover{background:var(--fg);color:var(--bg)}
 .row{display:flex;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--tile)}
-.wrap{padding:0 0 40px}
 .msg{padding:16px;color:var(--mute)}
 @media (max-width:700px){.pdp{grid-template-columns:1fr}}
 </style>
@@ -41,74 +45,114 @@ a:hover,button:hover{color:var(--mute)}
   <a href="#cart">CART (<span id="count">0</span>)</a>
 </header>
 <main id="app"></main>
+
 <script>
-const cats={TS:"tee",HD:"hoodie",LS:"longsleeve",PT:"pants",SH:"shoe",BD:"bodysuit",JK:"jacket",SK:"skirt"};
-const codes=[];
-Object.keys(cats).forEach(c=>{for(let i=1;i<=6;i++)codes.push(c+"-0"+i)});
-const products=codes.map(id=>({id,type:cats[id.split("-")[0]],price:30+((id.charCodeAt(0)*7+id.charCodeAt(4)*13)%12)*10}));
+/* ============================================================
+   EDIT HERE: your products, names, prices and photos
+   - code:    the short code shown on the grid
+   - name:    the product name shown on the product page
+   - section: "men" or "women"
+   - images:  put your photos in a folder called "images"
+              next to this file and list their file names here.
+              The FIRST image is the one shown on the grid.
+   ============================================================ */
+const PRODUCTS = [
+  { id:"boots",  code:"BT-01", name:"NZN BOOTZ 1",  section:"men",   price:7000,
+    images:["images/nzn boots 1.jpg","images/nzn boots 1(2).jpg"] },
+  { id:"slides", code:"SL-01", name:"NZN SLIDEZ 1",   section:"men",   price:4000,
+    images:["images/nzn slides 1.jpg"] },
+  { id:"heels",  code:"HL-01", name:"NZN HEELZ 1", section:"women", price:10000,
+    images:["images/nzn heels 1-1.jpg","images/nzn heels 1-2.jpg"] }
+];
 
-const shapes={
- tee:"M30 10 L10 22 L18 38 L28 33 L28 90 L72 90 L72 33 L82 38 L90 22 L70 10 Q50 24 30 10Z",
- hoodie:"M28 12 L8 26 L16 60 L28 54 L28 92 L72 92 L72 54 L84 60 L92 26 L72 12 Q50 34 28 12Z",
- longsleeve:"M30 10 L6 30 L12 78 L24 76 L26 40 L28 90 L72 90 L74 40 L76 76 L88 78 L94 30 L70 10 Q50 24 30 10Z",
- pants:"M28 8 L72 8 L78 92 L55 92 L50 36 L45 92 L22 92Z",
- shoe:"M10 60 L10 78 L90 78 L90 66 Q70 62 58 48 L40 54 L34 40 Z",
- bodysuit:"M34 8 L66 8 L62 40 L74 56 L66 92 L34 92 L26 56 L38 40Z",
- jacket:"M30 10 L8 24 L14 80 L26 78 L28 92 L72 92 L74 78 L86 80 L92 24 L70 10 L50 22Z",
- skirt:"M32 14 L68 14 L88 88 L12 88Z"
+/* EDIT HERE: section titles and sizes */
+const SECTIONS = {
+  men:   { title:"MEN",   sizes:["40","41","42","43","44","45"] },
+  women: { title:"WOMEN", sizes:["36","37","38","39","40","41"] }
 };
-const svg=t=>`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${shapes[t]}" fill="var(--shape)"/></svg>`;
+/* ============================================================ */
 
-let cart=[];
-try{cart=JSON.parse(localStorage.getItem("cart")||"[]")}catch(e){cart=[]}
-const save=()=>{try{localStorage.setItem("cart",JSON.stringify(cart))}catch(e){}};
-const $=s=>document.querySelector(s);
-const app=$("#app");
-let size=null;
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const missing = "this.style.display='none'";
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch(e) { cart = []; }
+const save = () => { try { localStorage.setItem("cart", JSON.stringify(cart)); } catch(e) {} };
+const count = () => { $("#count").textContent = cart.length; };
 
 function home(){
-  app.innerHTML='<div class="grid">'+products.map(p=>
-    `<a class="tile" href="#p-${p.id}">${svg(p.type)}<span>${p.id}</span></a>`).join("")+'</div>';
+  app.innerHTML = Object.keys(SECTIONS).map(key => {
+    const items = PRODUCTS.filter(p => p.section === key);
+    if(!items.length) return "";
+    return `<h2>${SECTIONS[key].title}</h2><div class="grid">` + items.map(p =>
+      `<a class="tile" href="#p-${p.id}"><img src="${p.images[0]}" alt="${p.name}" onerror="${missing}"><span>${p.code}</span></a>`
+    ).join("") + `</div>`;
+  }).join("");
 }
+
 function product(id){
-  const p=products.find(x=>x.id===id);
-  if(!p){home();return}
-  size=null;
-  app.innerHTML=`<div class="pdp"><div class="img">${svg(p.type)}</div>
-  <div class="info"><a href="#home">← BACK</a>
-  <div>${p.id}<br><span style="color:var(--mute)">$${p.price}</span></div>
-  <div class="sizes">${["XS","S","M","L","XL"].map(s=>`<button data-s="${s}">${s}</button>`).join("")}</div>
-  <button class="add" id="add">ADD TO CART</button><div id="note" class="msg" style="padding:0"></div></div></div>`;
-  app.querySelectorAll(".sizes button").forEach(b=>b.onclick=()=>{
-    size=b.dataset.s;
-    app.querySelectorAll(".sizes button").forEach(x=>x.classList.toggle("on",x===b));
+  const p = PRODUCTS.find(x => x.id === id);
+  if(!p){ home(); return; }
+  let size = null;
+  const sizes = SECTIONS[p.section].sizes;
+  const many = p.images.length > 1;
+  app.innerHTML = `<div class="pdp">
+    <div class="gallery">
+      <div class="slides" id="slides">${p.images.map(src =>
+        `<div class="s"><img src="${src}" alt="${p.name}" onerror="${missing}"></div>`).join("")}</div>
+      ${many ? `<button class="arrow prev" id="prev" aria-label="Previous">‹</button>
+                <button class="arrow next" id="next" aria-label="Next">›</button>
+                <div class="dots" id="dots">${p.images.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join("")}</div>` : ""}
+    </div>
+    <div class="info">
+      <a href="#home">← BACK</a>
+      <div>${p.code} / ${p.name}<br><span style="color:var(--mute)">$${p.price}</span></div>
+      <div class="sizes">${sizes.map(s=>`<button data-s="${s}">${s}</button>`).join("")}</div>
+      <button class="add" id="add">ADD TO CART</button>
+      <div id="note" class="msg" style="padding:0"></div>
+    </div></div>`;
+
+  const sl = $("#slides");
+  if(many){
+    const go = d => sl.scrollBy({left: d * sl.clientWidth, behavior:"smooth"});
+    $("#prev").onclick = () => go(-1);
+    $("#next").onclick = () => go(1);
+    sl.addEventListener("scroll", () => {
+      const i = Math.round(sl.scrollLeft / sl.clientWidth);
+      document.querySelectorAll("#dots i").forEach((d,n) => d.classList.toggle("on", n === i));
+    });
+  }
+  app.querySelectorAll(".sizes button").forEach(b => b.onclick = () => {
+    size = b.dataset.s;
+    app.querySelectorAll(".sizes button").forEach(x => x.classList.toggle("on", x === b));
   });
-  $("#add").onclick=()=>{
-    if(!size){$("#note").textContent="SELECT A SIZE";return}
-    cart.push({id:p.id,size,price:p.price});save();count();
-    $("#note").textContent="ADDED";
+  $("#add").onclick = () => {
+    if(!size){ $("#note").textContent = "SELECT A SIZE"; return; }
+    cart.push({code:p.code, name:p.name, size, price:p.price}); save(); count();
+    $("#note").textContent = "ADDED";
   };
 }
+
 function cartView(){
-  if(!cart.length){app.innerHTML='<div class="msg">CART IS EMPTY</div>';return}
-  const total=cart.reduce((a,c)=>a+c.price,0);
-  app.innerHTML='<div class="wrap">'+cart.map((c,i)=>
-    `<div class="row"><span>${c.id} / ${c.size}</span><span>$${c.price} <button data-i="${i}">REMOVE</button></span></div>`).join("")+
+  if(!cart.length){ app.innerHTML = '<div class="msg">CART IS EMPTY</div>'; return; }
+  const total = cart.reduce((a,c) => a + c.price, 0);
+  app.innerHTML = cart.map((c,i) =>
+    `<div class="row"><span>${c.code} / ${c.name} / ${c.size}</span><span>$${c.price} <button data-i="${i}">REMOVE</button></span></div>`).join("") +
     `<div class="row"><span>TOTAL</span><span>$${total}</span></div>
-     <div class="row"><button id="co">CHECKOUT (DEMO)</button></div><div id="note" class="msg"></div></div>`;
-  app.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{cart.splice(+b.dataset.i,1);save();count();cartView()});
-  $("#co").onclick=()=>{$("#note").textContent="THIS IS A STUDENT DEMO. NO REAL PAYMENT.";};
+     <div class="row"><button id="co">CHECKOUT (DEMO)</button></div><div id="note" class="msg"></div>`;
+  app.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { cart.splice(+b.dataset.i,1); save(); count(); cartView(); });
+  $("#co").onclick = () => { $("#note").textContent = "STUDENT DEMO. NO REAL PAYMENT."; };
 }
-function count(){$("#count").textContent=cart.length}
+
 function route(){
-  const h=location.hash.slice(1)||"home";
+  const h = location.hash.slice(1) || "home";
   window.scrollTo(0,0);
-  if(h==="cart")cartView();
-  else if(h.startsWith("p-"))product(h.slice(2));
+  if(h === "cart") cartView();
+  else if(h.startsWith("p-")) product(h.slice(2));
   else home();
 }
-window.addEventListener("hashchange",route);
-count();route();
+window.addEventListener("hashchange", route);
+count(); route();
 </script>
 </body>
 </html>
